@@ -1,7 +1,5 @@
 <?php
 
-namespace autoload\data_converters;
-
 /*
 **  This class will convert a JSON Schema object to
 **  an XSD Schema document
