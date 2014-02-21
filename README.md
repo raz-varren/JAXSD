@@ -7,14 +7,16 @@ I had been making a lot of APIs and validating my user input with JSON schema. I
 
 ### Example:
 
-	<?php
-	
-	include('jaxsd.php');
-	
-	$schema_file = '/path/to/json/schema.json';
-	
-	$schema_data = json_decode(file_get_contents($schema_file));
-	
-	echo Jaxsd::convert($schema_data, true);
-	
-	exit;
+```php
+<?php
+
+include('jaxsd.php');
+
+$schema_file = '/path/to/json/schema.json';
+
+$schema_data = json_decode(file_get_contents($schema_file));
+
+echo Jaxsd::convert($schema_data, true);
+
+exit;
+```
