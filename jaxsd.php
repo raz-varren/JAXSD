@@ -204,7 +204,9 @@ class Jaxsd{
 	
 	
 	private static function make_number($node, $arr_flag = false){
-		if(count(array_intersect(self::$number_restrictions, array_keys((array)$node))) > 0){
+		$restrictions = ($arr_flag) ? $node->items : $node;
+		
+		if(count(array_intersect(self::$number_restrictions, array_keys((array)$restrictions))) > 0){
 			$simple = self::$xml->createElement(self::$ns.'simpleType');
 			$res = self::$xml->createElement(self::$ns.'restriction');
 			$res_attr = self::$xml->createAttribute('base');
@@ -212,21 +214,21 @@ class Jaxsd{
 			
 			$res->appendChild($res_attr);
 			
-			if($node->minLength && !$node->minimum){
+			if($restrictions->minLength && !$restrictions->minimum){
 				$min = self::$xml->createElement(self::$ns.'minInclusive');
 				$min_attr = self::$xml->createAttribute('value');
-				$min_attr->value = str_pad('1', $node->minLength, '0');
+				$min_attr->value = str_pad('1', $restrictions->minLength, '0');
 				$min->appendChild($min_attr);
 				$res->appendChild($min);
-			}elseif($node->minimum){
+			}elseif($restrictions->minimum){
 				$min = self::$xml->createElement(self::$ns.'minInclusive');
 				$min_attr = self::$xml->createAttribute('value');
-				$min_attr->value = $node->minimum;
+				$min_attr->value = $restrictions->minimum;
 				$min->appendChild($min_attr);
 				$res->appendChild($min);
 			}
 			
-			if($node->maxLength && !$node->maximum){
+			if($restrictions->maxLength && !$restrictions->maximum){
 				$max = self::$xml->createElement(self::$ns.'maxInclusive');
 				$max_attr = self::$xml->createAttribute('value');
 				
@@ -236,14 +238,14 @@ class Jaxsd{
 				//decimal, unsignedLong, and nonNegativeInteger, but even though all the docs
 				//say that it should be good up to 30 digits and many online validators confirm
 				//this, DomDocument don't play by those rules so just truncate this to 24.
-				$node->maxLength = ($node->maxLength > 24) ? 24 : $node->maxLength;
-				$max_attr->value = str_pad('9', $node->maxLength, '9');
+				$restrictions->maxLength = ($restrictions->maxLength > 24) ? 24 : $restrictions->maxLength;
+				$max_attr->value = str_pad('9', $restrictions->maxLength, '9');
 				$max->appendChild($max_attr);
 				$res->appendChild($max);
-			}elseif($node->maximum){
+			}elseif($restrictions->maximum){
 				$max = self::$xml->createElement(self::$ns.'maxInclusive');
 				$max_attr = self::$xml->createAttribute('value');
-				$max_attr->value = $node->maximum;
+				$max_attr->value = $restrictions->maximum;
 				$max->appendChild($max_attr);
 				$res->appendChild($max);
 			}
