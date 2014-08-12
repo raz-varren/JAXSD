@@ -42,9 +42,9 @@ class Jaxsd{
 		self::$xml = new \DOMDocument('1.0', 'UTF-8');
 		self::$xml->formatOutput = $pretty;
 		
-		$schema = self::$xml->createElementNS('http://www.w3.org/2001/XMLSchema', self::$ns.'schema');
-		$root = self::$xml->createElement(self::$ns.'element');
-		$att = self::$xml->createAttribute('name');
+		$schema = self::$xml->createElementNS('http://www.w3.org/2001/XMLSchema', self::nsval('schema'));
+		$root = self::elem('element');
+		$att = self::attr('name');
 		$att->value = $root_node;
 		$root->appendChild($att);
 		
@@ -82,14 +82,14 @@ class Jaxsd{
 			
 			if($node->required){
 				$skip_min = true;
-				$arr_min_attr = self::$xml->createAttribute('minOccurs');
+				$arr_min_attr = self::attr('minOccurs');
 				$arr_min_attr->value = 1;
 				if($node->minItems) $arr_min_attr->value = $node->minItems;
 				
 				$xml->appendChild($arr_min_attr);
 			}
 			
-			$arr_attr = self::$xml->createAttribute('maxOccurs');
+			$arr_attr = self::attr('maxOccurs');
 			$arr_attr->value = 'unbounded';
 			if($node->maxItems) $arr_attr->value = $node->maxItems;
 			
@@ -117,7 +117,7 @@ class Jaxsd{
 		
 		$attr_name = $xml->getAttribute('name');
 		if($attr_name && $attr_name != 'root' && !$node->required && !$skip_min){
-			$min_occur_attr = self::$xml->createAttribute('minOccurs');
+			$min_occur_attr = self::attr('minOccurs');
 			$min_occur_attr->value = '0';
 			$xml->appendChild($min_occur_attr);
 		}
@@ -127,16 +127,16 @@ class Jaxsd{
 	}
 	
 	private static function make_object($node, $arr_flag = false){
-		$ct = self::$xml->createElement(self::$ns.'complexType');
-		$seq = self::$xml->createElement(self::$ns.'sequence');
+		$ct = self::elem('complexType');
+		$seq = self::elem('sequence');
 		
 		$properties = ($arr_flag) ? $node->items->properties : $node->properties;
 		
 		foreach($properties as $k => $p){
 			
 			
-			$elem = self::$xml->createElement(self::$ns.'element');
-			$attr = self::$xml->createAttribute('name');
+			$elem = self::elem('element');
+			$attr = self::attr('name');
 			$attr->value = $k;
 			$elem->appendChild($attr);
 			
@@ -154,34 +154,36 @@ class Jaxsd{
 		$restrictions = ($arr_flag) ? $node->items : $node;
 		
 		if(count(array_intersect(self::$string_restrictions, array_keys((array)$restrictions))) > 0){
-			$simple = self::$xml->createElement(self::$ns.'simpleType');
-			$res = self::$xml->createElement(self::$ns.'restriction');
-			$res_attr = self::$xml->createAttribute('base');
-			$res_attr->value = self::$ns.'string';
+			$simple = self::elem('simpleType');
+			$res = self::elem('restriction');
+			$res_attr = self::attr('base');
+			$res_attr->value = self::nsval('string');
+			
 			
 			$res->appendChild($res_attr);
 			
+			
 			if($restrictions->minLength){
-				$min = self::$xml->createElement(self::$ns.'minLength');
-				$min_attr = self::$xml->createAttribute('value');
+				$min = self::elem('minLength');
+				$min_attr = self::attr('value');
 				$min_attr->value = $restrictions->minLength;
 				$min->appendChild($min_attr);
 				$res->appendChild($min);
 			}
 			
 			if($restrictions->maxLength){
-				$max = self::$xml->createElement(self::$ns.'maxLength');
-				$max_attr = self::$xml->createAttribute('value');
+				$max = self::elem('maxLength');
+				$max_attr = self::attr('value');
 				$max_attr->value = $restrictions->maxLength;
 				$max->appendChild($max_attr);
 				$res->appendChild($max);
 			}
 			
 			if($restrictions->pattern){
-				$patt = self::$xml->createElement(self::$ns.'pattern');
+				$patt = self::elem('pattern');
 				
 				//haha
-				$patt_att = self::$xml->createAttribute('value');
+				$patt_att = self::attr('value');
 				
 				//xsd patterns are already anchored at both ends and don't support delimeters or flags
 				//so let's get rid of them
@@ -196,8 +198,8 @@ class Jaxsd{
 			
 			return $simple;
 		}else{
-			$str_attr = self::$xml->createAttribute('type');
-			$str_attr->value = self::$ns.'string';
+			$str_attr = self::attr('type');
+			$str_attr->value = self::nsval('string');
 			return $str_attr;
 		}
 	}
@@ -207,30 +209,30 @@ class Jaxsd{
 		$restrictions = ($arr_flag) ? $node->items : $node;
 		
 		if(count(array_intersect(self::$number_restrictions, array_keys((array)$restrictions))) > 0){
-			$simple = self::$xml->createElement(self::$ns.'simpleType');
-			$res = self::$xml->createElement(self::$ns.'restriction');
-			$res_attr = self::$xml->createAttribute('base');
-			$res_attr->value = self::$ns.'integer';
+			$simple = self::elem('simpleType');
+			$res = self::elem('restriction');
+			$res_attr = self::attr('base');
+			$res_attr->value = self::nsval('integer');
 			
 			$res->appendChild($res_attr);
 			
 			if($restrictions->minLength && !$restrictions->minimum){
-				$min = self::$xml->createElement(self::$ns.'minInclusive');
-				$min_attr = self::$xml->createAttribute('value');
+				$min = self::elem('minInclusive');
+				$min_attr = self::attr('value');
 				$min_attr->value = str_pad('1', $restrictions->minLength, '0');
 				$min->appendChild($min_attr);
 				$res->appendChild($min);
 			}elseif($restrictions->minimum){
-				$min = self::$xml->createElement(self::$ns.'minInclusive');
-				$min_attr = self::$xml->createAttribute('value');
+				$min = self::elem('minInclusive');
+				$min_attr = self::attr('value');
 				$min_attr->value = $restrictions->minimum;
 				$min->appendChild($min_attr);
 				$res->appendChild($min);
 			}
 			
 			if($restrictions->maxLength && !$restrictions->maximum){
-				$max = self::$xml->createElement(self::$ns.'maxInclusive');
-				$max_attr = self::$xml->createAttribute('value');
+				$max = self::elem('maxInclusive');
+				$max_attr = self::attr('value');
 				
 				//I don't know why, but even though I have tried numerous parsers and
 				//looked into the xsd spec for integers, php's domdocument refuses to
@@ -243,8 +245,8 @@ class Jaxsd{
 				$max->appendChild($max_attr);
 				$res->appendChild($max);
 			}elseif($restrictions->maximum){
-				$max = self::$xml->createElement(self::$ns.'maxInclusive');
-				$max_attr = self::$xml->createAttribute('value');
+				$max = self::elem('maxInclusive');
+				$max_attr = self::attr('value');
 				$max_attr->value = $restrictions->maximum;
 				$max->appendChild($max_attr);
 				$res->appendChild($max);
@@ -254,23 +256,23 @@ class Jaxsd{
 			
 			return $simple;
 		}else{
-			$int_attr = self::$xml->createAttribute('type');
-			$int_attr->value = self::$ns.'integer';
+			$int_attr = self::attr('type');
+			$int_attr->value = self::nsval('integer');
 			return $int_attr;
 		}
 	}
 	
 	private static function make_enum($node, $arr_flag = false){
-		$simple = self::$xml->createElement(self::$ns.'simpleType');
-		$res = self::$xml->createElement(self::$ns.'restriction');
-		$res_attr = self::$xml->createAttribute('base');
-		$res_attr->value = self::$ns.'string';
+		$simple = self::elem('simpleType');
+		$res = self::elem('restriction');
+		$res_attr = self::attr('base');
+		$res_attr->value = self::nsval('string');
 		
 		$res->appendChild($res_attr);
 		
 		foreach($node->enum as $e){
-			$enum = self::$xml->createElement(self::$ns.'enumeration');
-			$val = self::$xml->createAttribute('value');
+			$enum = self::elem('enumeration');
+			$val = self::attr('value');
 			$val->value = $e;
 			$enum->appendChild($val);
 			$res->appendChild($enum);
@@ -283,10 +285,10 @@ class Jaxsd{
 	
 	private static function make_union($node, $arr_flag = false){
 		
-		$simple = self::$xml->createElement(self::$ns.'simpleType');
-		$union = self::$xml->createElement(self::$ns.'union');
+		$simple = self::elem('simpleType');
+		$union = self::elem('union');
 		
-		$members = self::$xml->createAttribute('memberTypes');
+		$members = self::attr('memberTypes');
 		
 		$member_val = '';
 		
@@ -306,8 +308,20 @@ class Jaxsd{
 	}
 	
 	private static function make_bool($node, $arr_flag = false){
-		$bool_attr = self::$xml->createAttribute('type');
-		$bool_attr->value = self::$ns.'boolean';
+		$bool_attr = self::attr('type');
+		$bool_attr->value = self::nsval('boolean');
 		return $bool_attr;
+	}
+	
+	private static function elem($elem_name){
+		return self::$xml->createElement(self::$ns.$elem_name);
+	}
+	
+	private static function attr($attr_name){
+		return self::$xml->createAttribute($attr_name);
+	}
+	
+	private static function nsval($val){
+		return self::$ns.$val;
 	}
 }
