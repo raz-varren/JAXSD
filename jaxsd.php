@@ -151,7 +151,9 @@ class Jaxsd{
 	}
 	
 	private static function make_string($node, $arr_flag = false){
-		if(count(array_intersect(self::$string_restrictions, array_keys((array)$node))) > 0){
+		$restrictions = ($arr_flag) ? $node->items : $node;
+		
+		if(count(array_intersect(self::$string_restrictions, array_keys((array)$restrictions))) > 0){
 			$simple = self::$xml->createElement(self::$ns.'simpleType');
 			$res = self::$xml->createElement(self::$ns.'restriction');
 			$res_attr = self::$xml->createAttribute('base');
@@ -159,23 +161,23 @@ class Jaxsd{
 			
 			$res->appendChild($res_attr);
 			
-			if($node->minLength){
+			if($restrictions->minLength){
 				$min = self::$xml->createElement(self::$ns.'minLength');
 				$min_attr = self::$xml->createAttribute('value');
-				$min_attr->value = $node->minLength;
+				$min_attr->value = $restrictions->minLength;
 				$min->appendChild($min_attr);
 				$res->appendChild($min);
 			}
 			
-			if($node->maxLength){
+			if($restrictions->maxLength){
 				$max = self::$xml->createElement(self::$ns.'maxLength');
 				$max_attr = self::$xml->createAttribute('value');
-				$max_attr->value = $node->maxLength;
+				$max_attr->value = $restrictions->maxLength;
 				$max->appendChild($max_attr);
 				$res->appendChild($max);
 			}
 			
-			if($node->pattern){
+			if($restrictions->pattern){
 				$patt = self::$xml->createElement(self::$ns.'pattern');
 				
 				//haha
@@ -183,7 +185,7 @@ class Jaxsd{
 				
 				//xsd patterns are already anchored at both ends and don't support delimeters or flags
 				//so let's get rid of them
-				$patt_att->value = preg_replace(array('/^\/?\^?/', '/\$?(\/.*|\/?)$/'), '', $node->pattern);
+				$patt_att->value = preg_replace(array('/^\/?\^?/', '/\$?(\/.*|\/?)$/'), '', $restrictions->pattern);
 				//$patt_att->value = substr($node->pattern, 1, -1);
 				$patt->appendChild($patt_att);
 				
@@ -307,4 +309,3 @@ class Jaxsd{
 		return $bool_attr;
 	}
 }
-
