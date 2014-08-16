@@ -66,6 +66,9 @@ class Jaxsd{
 			if($node->items->type == 'object'){
 				
 				$xml->appendChild(self::make_object($node, true));
+			}elseif($node->enum){
+				
+				$xml->appendChild(self::make_enum($node, true));
 			}elseif($node->items->type == 'string'){
 				
 				$xml->appendChild(self::make_string($node, true));
@@ -75,9 +78,6 @@ class Jaxsd{
 			}elseif(is_array($node->items->type)){
 				
 				$xml->appendChild(self::make_union($node, true));
-			}elseif($node->enum){
-				
-				$xml->appendChild(self::make_enum($node, true));
 			}
 			
 			if($node->required){
@@ -98,6 +98,9 @@ class Jaxsd{
 		}elseif($node->type == 'object'){
 
 			$xml->appendChild(self::make_object($node));
+		}elseif($node->enum){
+		
+			$xml->appendChild(self::make_enum($node));
 		}elseif($node->type == 'string'){
 
 			$xml->appendChild(self::make_string($node));
